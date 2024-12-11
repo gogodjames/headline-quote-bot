@@ -10,7 +10,7 @@ This project is an automated social media bot that uses GPT's search feature to 
 ## Technologies
 - **Python**: For backend development.
 - **OpenAI GPT API**: For generating quotes related to headlines and using search feature to find current headlines.
-- **Tweepy & Instabot**: For interacting with the Twitter API (or another social media API).
+- **Tweepy & Instabot**: For interacting with the Twitter and Instagram APIs.
 - **News API**: also for fetching current headlines.
 
 ## Getting Started
