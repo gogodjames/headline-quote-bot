@@ -9,7 +9,7 @@ REDDIT_USER_AGENT = os.getenv('REDDIT_USER_AGENT')
 REDDIT_USERNAME = os.getenv('REDDIT_USERNAME')
 REDDIT_PASSWORD = os.getenv('REDDIT_PASSWORD')
 
-import praw
+import praw #reddit API init, sets up u/politics-quote-bot as a personal use script (therefore, no need for OAuth, just the password authentification)
 redditbot = praw.Reddit(
     client_id=REDDIT_CLIENT_ID,
     client_secret=REDDIT_CLIENT_SECRET,
@@ -18,32 +18,23 @@ redditbot = praw.Reddit(
     password=REDDIT_PASSWORD
 )
 subreddit = redditbot.subreddit("politics")
-for submission in subreddit.hot(limit=10):
-    print(submission.title)
+for submission in subreddit.rising(limit=1): #finds the most popular rising post on r/politics at time of request
+    headline = submission.title #saves its title as the headline
+    rising_post = submission #saves the post itself to be used for comment later
 
-'''from newsdataapi import NewsDataApiClient
-newsapi = NewsDataApiClient(apikey="pub_62754921c21b1816fa80ae62f8c39337f2a15")
-response = newsapi.latest_api(country='us',language='en', category='sports')
-for article in response['results']:
-    print(f"Title: {article['title']}")
-    print(f"Categories: {article['category']}")
-    print("---")'''
-
-'''from newsapi import NewsApiClient
-
-newsapi = NewsApiClient(news_api_key)
-headlines=newsapi.get_top_headlines(country='us',sortBy='popularity',page_size=1,category='general')
-for article in headlines['articles']:
-    print(article['title'])'''
-
-'''import openai
+import openai #ChatGPT API init
 openai.api_key=gpt_api_key
 response = openai.chat.completions.create(
     model="gpt-3.5-turbo",
     messages=[
-        {"role":"system", "content": "You are an analyst and historian tasked with analyzing daily news headlines and matching them with relevant quotes from ancient history. Provide a bold and insightful quote and a 1-2 sentence analysis that strongly connects the quote to the headline, making a decisive statement about the implications of the headline. The purpose is to create a 'quote of the day' social media post where the quote is the centerpiece and the analysis serves as a striking caption. For example: Headline: 'Supreme court overturns Roe v Wade.' Quote: 'The closer the collapse of the Empire, the crazier its laws are.' - Marcus Tullius Cicero. Explanation: We are witness to the fall of women's rights, despite vast support from the American public. The failure of our laws to protect citizens foretells the fall of the American nation."},
-        {"role":"user", "content":"Congress fails to pass climate change bill despite increasing natural disasters."}
+        #system content gives a prompt asking GPT to analyze a headline and spit out a quote related to it and some explanation
+        {"role":"system", "content": "You are an analyst and historian tasked with analyzing daily news headlines and matching them with bold, radical, and historically significant quotes from less mainstream figures. Provide a direct quote (no paraphrasing or made-up content) from thinkers such as Karl Marx, al-Farabi, or similarly radical or underrepresented voices. Follow the quote with a sharp, insightful, and provocative 1-2 sentence analysis that connects the quote to the headline. For personal dynamics or ego-driven headlines (e.g., conflicts between public figures or power struggles), focus on dramatic, psychological, or interpersonal interpretations, emphasizing motivations and character. For systemic or ideological issues (e.g., economic policies, societal shifts), provide broader philosophical or historical commentary, highlighting structural implications and ideological stakes. Avoid quoting overly familiar figures like Plato or MLK unless absolutely necessary, and ensure the quote is the centerpiece of the response."},
+        #user content feeds the headline we got from the reddit API
+        {"role":"user", "content":headline}
     ],
-    max_tokens= 100
+    max_tokens= 500 #token number needs to be fine tuned (must consider accuracy of GPT's response against the maitenence cost of the API)
 )
-print(response['choices'][0]['message']['content'])'''
+comment = response['choices'][0]['message']['content'] 
+rising_post.reply(comment)
+
+
